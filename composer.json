@@ -1,0 +1,22 @@
+{
+    "name": "discern/parameters",
+    "description": "Discern Parameters - define and manage strict typed parameters",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Richard Lee",
+            "email": "richardleedev@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Discern\\Parameter\\": "src/Parameter",
+            "Discern\\Test\\Parameter\\": "tests/Parameter"
+        }
+    },
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "^5"
+    }
+}
