@@ -12,9 +12,10 @@ use Discern\Parameter\ParameterInjectionFactory;
 use Discern\Parameter\ParameterRenderer;
 use Discern\Parameter\Contract\ParameterConfigInterface;
 use Discern\Parameter\Struct\ParameterStructFactory;
+use Discern\Parameter\Template\Factory;
+use Discern\Parameter\Template\ClassTemplate;
 use Discern\Test\Parameter\User;
 use Discern\Test\Parameter\Animal;
-
 
 class ClassTemplateTest extends TestCase {
   public function __construct()
@@ -45,6 +46,16 @@ class ClassTemplateTest extends TestCase {
       ->setParameterConfigCollectionFactory($param_collection_factory)
       ->setParameterFactoryCollection($param_factory_collection)
       ->setParser($parser);
+
+    $blank_template = new ClassTemplate();
+    $blank_template
+      ->setParameterStructFactory(new ParameterStructFactory())
+      ->setParameterConfigCollectionFactory($param_collection_factory)
+      ->setParameterFactoryCollection($param_factory_collection)
+      ->setParser($parser);
+
+    $this->factory = new Factory();
+    $this->factory->setClassTemplate($blank_template);
   }
 
   public function testCanInitializeTemplatedClass()
@@ -105,5 +116,61 @@ class ClassTemplateTest extends TestCase {
       $home->pet_name,
       $new_home->pet_name
     );
+  }
+
+  public function testCanGenerateClassTemplatesUsingFactory()
+  {
+    $callback = $this->factory->definition([
+      'owner_name' => '{owner:Discern\Test\Parameter\User.first_name} {owner.last_name}',
+      'pet_name' => '{pet.name} ({pet:Discern\Test\Parameter\Animal.type})',
+      'address' => '{owner.address}'
+    ]);
+
+    $return_value = $callback([
+      'owner' => [1],
+      'pet' => [2]
+    ], function($params) {
+      $this->assertEquals(
+        $params->owner_name,
+        'Richard Lee'
+      );
+
+      $this->assertEquals(
+        $params->pet_name,
+        'Rover (dog)'
+      );
+
+      $this->assertEquals(
+        $params->address,
+        '333 25th lane'
+      );
+
+      return 1;
+    });
+
+    $this->assertEquals(
+      $return_value,
+      1
+    );
+
+    $callback([
+      'owner' => [1, ['first_name' => 'Oshane']],
+      'pet' => [2, ['name' => 'Meowth', 'type' => 'cat']]
+    ], function($params) {
+      $this->assertEquals(
+        $params->pet_name,
+        'Meowth (cat)'
+      );
+
+      $this->assertEquals(
+        $params->owner_name,
+        'Oshane Lee'
+      );
+
+      $this->assertInstanceOf(
+        User::class,
+        $params->params()->owner
+      );
+    });
   }
 }

@@ -3,18 +3,21 @@
 class Animal{
   public $id;
   
-  public function __construct($id)
+  public function __construct($id, array $params = [])
   {
   	$this->id = $id;
+
+    $this->name = isset($params['name']) ? $params['name'] : 'Rover';
+    $this->type = isset($params['type']) ? $params['type'] : 'dog';
   }
 
   public function getType()
   {
-  	return 'dog';
+  	return $this->type;
   }
 
   public function getName()
   {
-  	return 'Rover';
+  	return $this->name;
   }
 }
