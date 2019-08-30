@@ -11,53 +11,53 @@ class ApiClient {
   // ...
   public function getComments($user_id, $post_id, array $options, array $headers = [])
   {
-  	if (!isset($this->base_url)) {
-  	  // throw exception if base url is not initialized
-  	}
+    if (!isset($this->base_url)) {
+      // throw exception if base url is not initialized
+    }
 
-  	if (!isset($this->http_client)) {
-  	  // throw exception if client is not initialized
-  	}
+    if (!isset($this->http_client)) {
+      // throw exception if client is not initialized
+    }
 
-  	if (!isset($this->auth_token)) {
-  	  // throw unauthorized exception if auth token isn't provided
-  	}
+    if (!isset($this->auth_token)) {
+      // throw unauthorized exception if auth token isn't provided
+    }
 
-  	if (!$this->isUuid($user_id)) {
-  	  throw new InvalidArgumentException('`user_id` parameter string is not a valid uuid');
-  	}
+    if (!$this->isUuid($user_id)) {
+      throw new InvalidArgumentException('`user_id` parameter string is not a valid uuid');
+    }
 
-  	if (!$this->isUuid($post_id)) {
-  	  throw new InvalidArgumentException('`post_id` parameter string is not a valid uuid');
-  	}
+    if (!$this->isUuid($post_id)) {
+      throw new InvalidArgumentException('`post_id` parameter string is not a valid uuid');
+    }
 
-  	if (isset($options['page']) && !is_int($options['page']) || $options['page'] <= 0) {
-  	  throw new InvalidArgumentException('options[`page`] is not valid page number');
-  	}
+    if (isset($options['page']) && !is_int($options['page']) || $options['page'] <= 0) {
+      throw new InvalidArgumentException('options[`page`] is not valid page number');
+    }
 
-  	if (isset($options['before_date'])) {
-  	  if (!$options['before_date'] instanceof \DataTime) {
-  		throw new InvalidArgumentException('options[`before_date`] should be a DateTime object');
-  	  }
-  	}
+    if (isset($options['before_date'])) {
+      if (!$options['before_date'] instanceof \DataTime) {
+      throw new InvalidArgumentException('options[`before_date`] should be a DateTime object');
+      }
+    }
 
-  	if (isset($options['query'])) {
-  	  //... urlencode the query string if it exists
-  	}
+    if (isset($options['query'])) {
+      //... urlencode the query string if it exists
+    }
 
-  	//... handle other options
+    //... handle other options
 
-  	// build to path
-  	$path = $this->base_url."/post/{$post_id}/comments";
+    // build to path
+    $path = $this->base_url."/post/{$post_id}/comments";
 
-  	// build query options array
-  	$valid_options = [...] // possible query options
-  	$query_string = http_build_query(array_intersect_keys($valid_options, $options));
+    // build query options array
+    $valid_options = [...] // possible query options
+    $query_string = http_build_query(array_intersect_keys($valid_options, $options));
 
-  	// build headers 
-  	$headers = [...]
+    // build headers 
+    $headers = [...]
 
-  	return $this->http_client->get($path.'?'.$query_string, $headers);
+    return $this->http_client->get($path.'?'.$query_string, $headers);
   }
 }
 ```
@@ -77,13 +77,13 @@ $definition = $template([
   'path' => '{base_url:Url}/post/{post_id:Uuid}/comments',
   'client' => '{http_client:IHttpClient}',
   'options' => [
-  	'before_date' => '{before_date?:DateTime}',
-  	'page' => '{page?:Page.int}'
-  	'query' => '{query?:String.url_encoded}',
-  	'user_id' => '{user_id:Uuid}'
+    'before_date' => '{before_date?:DateTime}',
+    'page' => '{page?:Page.int}'
+    'query' => '{query?:String.url_encoded}',
+    'user_id' => '{user_id:Uuid}'
   ],
   'headers' => [
-  	'Authorization' => 'Bearer {auth_token:IAuthToken.string}'
+    'Authorization' => 'Bearer {auth_token:IAuthToken.string}'
   ]
 ]);
 ```
@@ -95,8 +95,8 @@ Now, our method looks like this instead:
 ```
 function request(SomeCustomClass $params) {
   return $params->http_client(
-  	$params->path.'?'.$params->options,
-  	$params->headers
+    $params->path.'?'.$params->options,
+    $params->headers
   );
 }
 ```
@@ -134,8 +134,8 @@ You should avoid directly modifying your parameter structure. Instead, use the `
 ```
 request(
   $comments_request->with([
-  	'user_id' => ['another user uuid'],
-  	'auth_token' => ['key', 'secret']
+    'user_id' => ['another user uuid'],
+    'auth_token' => ['key', 'secret']
   ])
 );
 ```
@@ -197,11 +197,11 @@ class SomeOtherPerson {
 class YourTypeFactory implements ParameterFactoryInterface {
   public function invokeParameter(ParameterConfigInterface $config, array $params)
   {
-  	$person = new SomeOtherPerson();
-  	$person->id = $params[0];
-  	$person->first_name = $params[1];
-  	$person->last_name = $params[2];
-  	return $person;
+    $person = new SomeOtherPerson();
+    $person->id = $params[0];
+    $person->first_name = $params[1];
+    $person->last_name = $params[2];
+    return $person;
   }
 }
 
@@ -212,7 +212,7 @@ Param::factory()->add(Person::class, new YourTypeFactory());
 $template = Param::template();
 $definition = $template([
   'house' => [
-  	'owner' => '{human:Person.first_name} {human.last_name}'
+    'owner' => '{human:Person.first_name} {human.last_name}'
   ]
 ]);
 
