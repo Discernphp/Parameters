@@ -2,7 +2,7 @@ Discern Parameters is a light weight php library that helps you rapidly design c
 
 Discern Parameters eliminates the need for internal type validation and conversion, by providing a fluent, multi-dimensional, and highly configurable interface for defining type requirements in your application.
 
-##Examples
+## Examples
 
 Let's say we're developing a wrapper for an api client that depends on a variety of external parameters. Your method might look something like this:
 
@@ -68,7 +68,7 @@ Next problem is you can't use the parameters as they are given. There's need to 
 
 All of the above issues are connected to a limited ability in php to natively define complex and nested parameter structures.
 
-###Creating Your Parameter Definitions
+### Creating Your Parameter Definitions
 
 Using discern we may define our parameter structure like this:
 
@@ -107,7 +107,7 @@ Second thing worth noting, is that the parameter definition will set the propert
 
 Third, and most importantly, by effectively defining our parameter structure our action method can be less concerned about the nuances of the request (i.e. `getComments`), and more concerned with receiving and sending a valid http request. That means, we can describe the specific details of our request, instead of creating complex functions, which do both validation/conversions and perform actions with the result.
 
-###Initializing Your Object
+### Initializing Your Object
 
 ```
 $comments_request = $definition([
@@ -127,7 +127,7 @@ request($comments_request);
 
 By separating the internal properties of the class from the actions that use them, we can avoid repetitive validation or the dreaded `undefined` property error resulting from uninitialized class variables. As a matter of fact, we can totally eliminate the class with it's setter/initialization methods, in favor of using a pure function, as demonstrated above.
 
-###Modifying Your Parameter Structure
+### Modifying Your Parameter Structure
 
 You should avoid directly modifying your parameter structure. Instead, use the `with` method.
 
@@ -142,7 +142,7 @@ request(
 
 The `with` method will clone the parameter structure with newly rendered values. Discern will only re-render the properties containing references to the changed parameters.
 
-Example:
+***Example***:
 
 ```
 $new_params = $comments_request->with([
@@ -157,7 +157,7 @@ var_dump((string) $comments_request->params()->user_id != $new_params->params()-
 
 ```
 
-###Passing Parameters
+### Passing Parameters
 
 Discern parameters can be instances or an array of constructor arguments for those instances.
 
@@ -177,7 +177,7 @@ $template([
 ]);
 ```
 
-###Managing Types
+### Managing Types
 
 You have full control of what and how classes are instanced, meaning you’re in control of how type hinting is enforced. You may replace any class definition by implementing the `ParameterFactoryInterface`. See below:
 
