@@ -216,10 +216,12 @@ $definition = $template([
   ]
 ]);
 
+// pass in the parameters
 $object = $definition([
   'owner' => [1, 'Oshane', 'Lee'],
 ]);
 
+// get the output
 echo $object->house['owner']; // outputs `Oshane Lee`.
 echo $object->params()->human->id // Outputs `1`
 ```
