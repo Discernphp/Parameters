@@ -19,7 +19,7 @@ class Factory {
   public function definition(array $properties)
   {
     return function(array $arguments, $callback = null) use($properties) {
-      if (!is_callable($callback)) {
+      if ($callback && !is_callable($callback)) {
         throw new InvalidArgumentException(
           sprintf(
             'definition: %s, requires callback function as second parameter, received `%s`',
@@ -30,7 +30,8 @@ class Factory {
       }
 
       $template = $this->getClassTemplate()->with($properties);
-      return $callback($template($arguments));
+      $params = $template($arguments);
+      return $callback ? $callback($params) : $params;
     };
   }
 }
