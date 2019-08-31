@@ -3,8 +3,11 @@
 use Discern\Parameter\Contract\ParameterConfigInterface;
 use Discern\Parameter\Contract\ParameterConfigCollectionInterface;
 use Discern\Parameter\InvalidParameterConfigException;
+use Discern\Parameter\Struct\Contract\FreezableInterface;
+use Discern\Parameter\Struct\FreezableTrait;
 
 class ParameterConfigCollection implements ParameterConfigCollectionInterface {
+  use FreezableTrait;
   /**
    * @var array
    */
@@ -27,15 +30,9 @@ class ParameterConfigCollection implements ParameterConfigCollectionInterface {
    */
   public function add(ParameterConfigInterface $param)
   {
-    if ($this->isFrozen()) {
-      throw new \BadMethodCallException(
-        sprintf(
-          'ParameterCollection frozen, cannot add new ParamterConfig(`%s`),
-           call `ParameterCollection::unfreeze()` first',
-          $param->getId()
-        )
-      );
-    }
+    $this->preventActionWhenFrozen(
+      $this->getPreventActionMessage('ParameterCollection:add', "ParamterConfig(`{$param->getId()}`)")
+    );
 
     $this->validateParameterConfig($param);
 
@@ -78,6 +75,11 @@ class ParameterConfigCollection implements ParameterConfigCollectionInterface {
     return $this->properties[$id];
   }
 
+  public function all()
+  {
+    return $this->properties;
+  }
+
   /**
    * @param  mixed $id
    * @return boolean
@@ -88,20 +90,32 @@ class ParameterConfigCollection implements ParameterConfigCollectionInterface {
     return isset($this->properties[$id]);
   }
 
-  public function isFrozen()
-  {
-    return $this->frozen;
-  }
-
+  /**
+   * @return Discern\Parameters\ParameterConfigCollection - instance
+   */
   public function freeze()
   {
     $this->frozen = true;
+
+    array_map(function($param){
+      return $param->freeze();
+    }, $this->all());
+
     return $this;
   }
 
+  /**
+   * @return Discern\Parameters\ParameterConfigCollection - instance
+   */
   public function unfreeze()
   {
     $this->frozen = false;
+
+    array_map(function($param){
+      return $param->unfreeze();
+    }, $this->all());
+
+    return $this;
   }
 
   /**

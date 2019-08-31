@@ -3,10 +3,13 @@
 use Discern\Parameter\Contract\ParameterConfigCollectionInterface;
 use Discern\Parameter\Contract\ParameterFactoryCollectionInterface;
 use Discern\Parameter\Struct\Contract\ParameterStructInterface;
+use Discern\Parameter\Struct\Contract\FreezableInterface;
+use Discern\Parameter\Struct\FreezableTrait;
 use Discern\Parameter\ParameterConfigException;
 
-class ParameterStruct implements ParameterStructInterface {
+class ParameterStruct implements ParameterStructInterface, FreezableInterface {
   use ParameterStructTrait;
+  use FreezableTrait;
 
   protected $properties;
 
@@ -23,6 +26,16 @@ class ParameterStruct implements ParameterStructInterface {
 
   public function setProperty($id, $args)
   {
+    $this->preventActionWhenFrozen(
+      sprintf(
+        'Cannot set value of `ParameterStruct::%s` when struct is `frozen`.
+        Avoid altering ParameterStruct properties directly. 
+        Instead use `ParameterStruct::with([\'%s\'=>[...arguments]])`',
+        $id,
+        $id
+      )
+    );
+
     $param = $this->getParameterConfigCollection()->get($id);
 
     if (is_object($args) && is_a($args, $param->getType())) {
@@ -84,6 +97,10 @@ class ParameterStruct implements ParameterStructInterface {
   public function with(array $properties)
   {
     $struct = clone($this);
-    return $struct->setProperties($properties);
+    $struct
+      ->unfreeze()
+      ->setProperties($properties);
+
+    return $this->isFrozen() ? $struct->freeze() : $struct;
   }
 }

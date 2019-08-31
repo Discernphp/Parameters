@@ -2,8 +2,12 @@
 
 use Discern\Parameter\Contract\ParameterConfigInterface;
 use Discern\Parameter\Contract\ParameterConfigChildInterface;
+use Discern\Parameter\Struct\Contract\FreezableInterface;
+use Discern\Parameter\Struct\FreezableTrait;
 
-class ParameterConfigChild implements ParameterConfigChildInterface {
+class ParameterConfigChild implements ParameterConfigChildInterface, FreezableInterface {
+  use FreezableTrait;
+
   private $parent;
 
   private $output_method;
@@ -12,6 +16,7 @@ class ParameterConfigChild implements ParameterConfigChildInterface {
   {
     $this->setParent($parent);
     $this->setOutputMethod($output_method);
+    $this->freeze();
   }
 
   public function getId()
@@ -51,6 +56,10 @@ class ParameterConfigChild implements ParameterConfigChildInterface {
 
   private function setOutputMethod($method)
   {
+    $this->preventActionWhenFrozen(
+      $this->getPreventActionMessage('ParameterConfig', 'output_method')
+    );
+
     $this->output_method = $method;
     return $this;
   }

@@ -228,6 +228,6 @@ echo $object->params()->human->id // Outputs `1`
 
 In the example above, `YourTypeFactory` is your factory class responsible for creating `Person` instances. It should return a `Person` instance, but has the ability to return any object with a `first_name` property (i.e. the `SomeOtherPerson` class).
 
-###STAR THIS PROJECT
+### STAR THIS PROJECT
 
 If you think this project is cool, please show it some github love ⭐️!

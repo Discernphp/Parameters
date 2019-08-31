@@ -2,8 +2,12 @@
 
 use Discern\Parameter\Contract\ParameterConfigInterface;
 use Discern\Parameter\Contract\ParameterConfigCollectionInterface;
+use Discern\Parameter\Struct\Contract\FreezableInterface;
+use Discern\Parameter\Struct\FreezableTrait;
 
-class ParameterConfig implements ParameterConfigInterface {
+class ParameterConfig implements ParameterConfigInterface, FreezableInterface {
+  use FreezableTrait;
+
   protected static $ALLOWED_TYPES = [
     'int',
     'object',
@@ -12,13 +16,13 @@ class ParameterConfig implements ParameterConfigInterface {
     'float'
   ];
 
-  protected $id;
+  private $id;
 
-  protected $default_arguments;
+  private $default_arguments;
 
-  protected $output_method;
+  private $output_method;
 
-  protected $is_optional;
+  private $is_optional;
 
   protected $missing_parameter_exception;
 
@@ -42,6 +46,8 @@ class ParameterConfig implements ParameterConfigInterface {
     if (isset($properties['missing_parameter_exception'])) {
       $this->setMissingParameterException($properties['missing_parameter_exception']);
     }
+
+    $this->freeze();
   }
 
   public function getId()
@@ -97,6 +103,10 @@ class ParameterConfig implements ParameterConfigInterface {
 
   protected function setId($id)
   {
+    $this->preventActionWhenFrozen(
+      $this->getPreventActionMessage('ParameterConfig', 'id='.$id)
+    );
+
     if (!preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $id)) {
       throw new \InvalidArgumentException("Parameter id `{$id}` invalid, no special characters allowed");
     }
@@ -107,18 +117,39 @@ class ParameterConfig implements ParameterConfigInterface {
 
   protected function setIsOptional($is_optional)
   {
+    $this->preventActionWhenFrozen(
+      $this->getPreventActionMessage(
+        'ParameterConfig',
+        'is_optional='.($is_optional ? 'true' : 'false')
+      )
+    );
+
     $this->is_optional = !!$is_optional;
     return $this;
   }
 
   protected function setDefaultArguments(array $default_arguments)
   {
+    $this->preventActionWhenFrozen(
+      $this->getPreventActionMessage(
+        'ParameterConfig',
+        'default_arguments'
+      )
+    );
+
     $this->default_arguments = $default_arguments;
     return $this;
   }
 
   protected function setType($type)
   {
+    $this->preventActionWhenFrozen(
+      $this->getPreventActionMessage(
+        'ParameterConfig',
+        'type'
+      )
+    );
+
     if (!class_exists($type) && !in_array($type, static::$ALLOWED_TYPES)) {
       $exception = new ParameterConfigException(
         sprintf(
