@@ -152,7 +152,7 @@ $new_params = $comments_request->with([
 echo $new_params->path; // 'https://discernphp.io/post/new_uuid/comments'
 echo $comments_request->path; // 'https://discernphp.io/post/some_uuid/comments'
 
-var_dump((string) $comments_request->params()->user_id != $new_params->params()->user_id); 
+var_dump($comments_request->params()->user_id != $new_params->params()->user_id); 
 // true
 
 ```
