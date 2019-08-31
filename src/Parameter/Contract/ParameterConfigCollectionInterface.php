@@ -7,10 +7,6 @@ interface ParameterConfigCollectionInterface {
 
   public function exists($id);
 
-  public function isFrozen();
-
-  public function freeze();
-
-  public function unfreeze();
+  public function all();
   //public function append(ParameterConfigCollectionInterface $parameter_collection);
 }

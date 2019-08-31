@@ -9,13 +9,13 @@ use Discern\Parameter\ParameterConfigChildFactory;
 use Discern\Parameter\ParameterFactoryCollection;
 use Discern\Parameter\ParameterFactory;
 use Discern\Parameter\ParameterInjectionFactory;
-use Discern\Parameter\ParameterRenderer;
 use Discern\Parameter\Contract\ParameterConfigInterface;
 use Discern\Parameter\Struct\ParameterStructFactory;
 use Discern\Parameter\Template\Factory;
 use Discern\Parameter\Template\ClassTemplate;
 use Discern\Test\Parameter\User;
 use Discern\Test\Parameter\Animal;
+use Discern\Parameter\Object\ObjectAccessor;
 
 class ClassTemplateTest extends TestCase {
   public function __construct()
@@ -26,7 +26,7 @@ class ClassTemplateTest extends TestCase {
     $param_config_factory = new ParameterConfigFactory();
     $param_config_child = new ParameterConfigChildFactory();
     $injection_factory = new ParameterInjectionFactory();
-    $renderer = new ParameterRenderer();
+    $accessor = new ObjectAccessor();
 
     $param_factory_collection
       ->add(ParameterFactoryCollection::$DEFAULT_FACTORY_ID, $param_factory);
@@ -37,7 +37,7 @@ class ClassTemplateTest extends TestCase {
       ->setParameterConfigCollectionFactory($param_collection_factory)
       ->setParameterConfigFactory($param_config_factory)
       ->setParameterInjectionFactory($injection_factory)
-      ->setParameterRenderer($renderer)
+      ->setObjectAccessor($accessor)
       ->setParameterConfigChildFactory($param_config_child);
 
     $this->home = new HomeTemplate();
@@ -45,6 +45,7 @@ class ClassTemplateTest extends TestCase {
       ->setParameterStructFactory(new ParameterStructFactory())
       ->setParameterConfigCollectionFactory($param_collection_factory)
       ->setParameterFactoryCollection($param_factory_collection)
+      ->setObjectAccessor($accessor)
       ->setParser($parser);
 
     $blank_template = new ClassTemplate();
@@ -52,6 +53,7 @@ class ClassTemplateTest extends TestCase {
       ->setParameterStructFactory(new ParameterStructFactory())
       ->setParameterConfigCollectionFactory($param_collection_factory)
       ->setParameterFactoryCollection($param_factory_collection)
+      ->setObjectAccessor($accessor)
       ->setParser($parser);
 
     $this->factory = new Factory();

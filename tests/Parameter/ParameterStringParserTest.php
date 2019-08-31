@@ -9,11 +9,11 @@ use Discern\Parameter\ParameterConfigChildFactory;
 use Discern\Parameter\ParameterFactoryCollection;
 use Discern\Parameter\ParameterFactory;
 use Discern\Parameter\ParameterInjectionFactory;
-use Discern\Parameter\ParameterRenderer;
 use Discern\Parameter\Contract\ParameterConfigInterface;
 use Discern\Parameter\InvalidParameterConfigException;
 use Discern\Test\Parameter\User;
 use Discern\Test\Parameter\Animal;
+use Discern\Parameter\Object\ObjectAccessor;
 
 final class ParameterStringParserTest extends TestCase {
   public function __construct()
@@ -24,7 +24,7 @@ final class ParameterStringParserTest extends TestCase {
     $param_config_factory = new ParameterConfigFactory();
     $param_config_child = new ParameterConfigChildFactory();
     $injection_factory = new ParameterInjectionFactory();
-    $renderer = new ParameterRenderer();
+    $accessor = new ObjectAccessor();
     $parser = new ParameterStringParser();
 
     $param_factory_collection
@@ -35,7 +35,7 @@ final class ParameterStringParserTest extends TestCase {
       ->setParameterConfigCollectionFactory($param_collection_factory)
       ->setParameterConfigFactory($param_config_factory)
       ->setParameterInjectionFactory($injection_factory)
-      ->setParameterRenderer($renderer)
+      ->setObjectAccessor($accessor)
       ->setParameterConfigChildFactory($param_config_child);
 
     $this->parser = $parser;

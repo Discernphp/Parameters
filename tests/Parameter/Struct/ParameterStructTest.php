@@ -71,4 +71,23 @@ final class ParameterStructTest extends TestCase {
       'user' => new Animal(1),
     ]);
   }
+
+  public function testFailsWhenSettingPropertyofFrozenStruct()
+  {
+    $params = $this->params->make([
+      new ParameterConfig('user', [
+        'type' => User::class
+      ]),   
+    ]);
+
+    $struct = $this->struct
+      ->make($params, $this->param_factory)
+      ->freeze();
+
+    $this->expectException(\BadMethodCallException::class);
+
+    $struct->setProperties([
+      'user' => [1],
+    ]);
+  }
 }

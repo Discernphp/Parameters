@@ -7,9 +7,10 @@ use Discern\Parameter\Contract\ParameterConfigInterface;
 use Discern\Parameter\Contract\ParameterStringParserInterface;
 use Discern\Parameter\Contract\ParameterFactoryCollectionInterface;
 use Discern\Parameter\Contract\ParameterInjectionFactoryInterface;
-use Discern\Parameter\Contract\ParameterRendererInterface;
+use Discern\Parameter\Object\Contract\ObjectAccessorInterface;
 use Discern\Parameter\Contract\ParameterConfigChildFactoryInterface;
 use Discern\Parameter\Contract\ParameterConfigChildInterface;
+use Discern\Parameter\Struct\Contract\FreezableInterface;
 
 class ParameterStringParser implements ParameterStringParserInterface {
   public function extractParameterDefinitions($string)
@@ -138,7 +139,7 @@ class ParameterStringParser implements ParameterStringParserInterface {
     $params = $this->extractParameterDefinitions($subject);
     $factory_collection = $this->getParameterFactoryCollection();
     $injection = $this->getParameterInjectionFactory()->make($subject);
-    $renderer = $this->getParameterRenderer();
+    $accessor = $this->getObjectAccessor();
     $result = $subject;
     $objects = [];
     $injected = 0;
@@ -196,14 +197,17 @@ class ParameterStringParser implements ParameterStringParserInterface {
       }
 
       // render the instance output
-      $output = $renderer->render(
+      $output = $accessor->get(
         $instance,
         $param->getOutputMethod()
       );
 
       // add parameter to environment
-      if ($env && !$env->isFrozen() && !$is_child) {
-        $env->add($param);
+      if ($env && !$is_child) {
+        $not_frozen = !($env instanceof FreezableInterface) || !$env->isFrozen();
+        if ($not_frozen) {
+          $env->add($param);
+        }
       }
 
       // if the parameter string is the same length
@@ -293,15 +297,15 @@ class ParameterStringParser implements ParameterStringParserInterface {
     return $this;
   }
 
-  public function setParameterRenderer(ParameterRendererInterface $renderer)
+  public function setObjectAccessor(ObjectAccessorInterface $accessor)
   {
-    $this->renderer = $renderer;
+    $this->accessor = $accessor;
     return $this; 
   }
 
-  public function getParameterRenderer()
+  public function getObjectAccessor()
   {
-    return $this->renderer;
+    return $this->accessor;
   }
 
   public function setParameterConfigChildFactory(ParameterConfigChildFactoryInterface $factory)

@@ -6,15 +6,12 @@ use Discern\Parameter\InvalidParameterConfigException;
 use Discern\Parameter\Struct\Contract\FreezableInterface;
 use Discern\Parameter\Struct\FreezableTrait;
 
-class ParameterConfigCollection implements ParameterConfigCollectionInterface {
+class ParameterConfigCollection implements ParameterConfigCollectionInterface, FreezableInterface {
   use FreezableTrait;
   /**
    * @var array
    */
   protected $properties;
-
-  
-  protected $frozen = false;
 
   /**
    * @param array Discern\Parameter\Contract\ParameterConfigInterface $parameters
@@ -95,7 +92,7 @@ class ParameterConfigCollection implements ParameterConfigCollectionInterface {
    */
   public function freeze()
   {
-    $this->frozen = true;
+    $this->is_frozen = true;
 
     array_map(function($param){
       return $param->freeze();
@@ -109,7 +106,7 @@ class ParameterConfigCollection implements ParameterConfigCollectionInterface {
    */
   public function unfreeze()
   {
-    $this->frozen = false;
+    $this->is_frozen = false;
 
     array_map(function($param){
       return $param->unfreeze();

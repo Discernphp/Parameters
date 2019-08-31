@@ -7,6 +7,7 @@ use Discern\Parameter\Contract\ParameterStringParserInterface;
 use Discern\Parameter\Struct\Contract\ParameterStructInterface;
 use Discern\Parameter\Struct\Contract\ParameterStructFactoryInterface;
 use Discern\Parameter\Template\Contract\TemplatedClassInterface;
+use Discern\Parameter\Object\Contract\ObjectAccessorInterface;
 
 trait ClassTemplateTrait {
   public function __invoke()
@@ -167,6 +168,25 @@ trait ClassTemplateTrait {
   }
 
   /**
+   * [setObjectAccessor description]
+   * @param ObjectAccessorInterface $accessor [description]
+   */
+  public function setObjectAccessor(ObjectAccessorInterface $accessor)
+  {
+    $this->accessor = $accessor;
+    return $this;
+  }
+
+  /**
+   * [getObjectAccessor description]
+   * @return [type] [description]
+   */
+  public function getObjectAccessor()
+  {
+    return $this->accessor;
+  }
+
+  /**
    * @param Discern\Parameter\Contract\ParameterConfigCollectionInterface $env
    * @param Discern\Parameter\Contract\ParameterFactoryCollectionInterface $factory
    * @return Discern\Parameter\Struct\Contract\ParameterStructInterface
@@ -197,7 +217,7 @@ trait ClassTemplateTrait {
   protected function populateInstance(TemplatedClassInterface $instance, array $properties, ParameterStructInterface $struct = null)
   {
     foreach ($properties as $id => $value) {
-      $instance->{$id} = $value;
+      $this->getObjectAccessor()->set($instance, $id, $value);
     }
 
     if ($struct) {

@@ -98,13 +98,18 @@ class ObjectAccessor implements ObjectAccessorInterface {
       }
     }
 
+    if ($action === 'set') {
+      return $instance->{$property} = $value;
+    }
+
     throw new \InvalidArgumentException(
       sprintf(
-        'Could not %s `%s.%s` using `%s`',
+        'Could not %s `%s::%s` using `%s`:`%s`. Make sure the property is defined',
         $action,
         get_class($instance),
         $property,
-        gettype($value)
+        gettype($value),
+        is_object($value) ? get_class($value) : $value
       )
     );
   }
