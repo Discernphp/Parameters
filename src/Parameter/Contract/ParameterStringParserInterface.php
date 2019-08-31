@@ -1,6 +1,7 @@
 <?php namespace Discern\Parameter\Contract;
 
 use Discern\Parameter\Contract\ParameterConfigChildFactoryInterface;
+use Discern\Parameter\Object\Contract\ObjectAccessorInterface;
 
 interface ParameterStringParserInterface {
   //extracts parameters from string
@@ -18,9 +19,9 @@ interface ParameterStringParserInterface {
 
   public function setParameterConfigFactory(ParameterConfigFactoryInterface $factory);
 
-  public function getParameterRenderer();
+  public function getObjectAccessor();
 
-  public function setParameterRenderer(ParameterRendererInterface $renderer);
+  public function setObjectAccessor(ObjectAccessorInterface $accessor);
 
   public function getParameterConfigCollectionFactory();
 
