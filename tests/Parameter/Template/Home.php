@@ -5,4 +5,10 @@ use Discern\Parameter\Template\TemplatedClassTrait;
 
 class Home implements TemplatedClassInterface {
   use TemplatedClassTrait;
+
+  public $owner_name;
+
+  public $pet_name;
+
+  public $address;
 }

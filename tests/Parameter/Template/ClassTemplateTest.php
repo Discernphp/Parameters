@@ -26,7 +26,7 @@ class ClassTemplateTest extends TestCase {
     $param_config_factory = new ParameterConfigFactory();
     $param_config_child = new ParameterConfigChildFactory();
     $injection_factory = new ParameterInjectionFactory();
-    $accessor = new ObjectAccessor();
+    $accessor = new ObjectAccessor(true);
 
     $param_factory_collection
       ->add(ParameterFactoryCollection::$DEFAULT_FACTORY_ID, $param_factory);
