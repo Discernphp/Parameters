@@ -27,6 +27,21 @@ class ParameterStringParser implements ParameterStringParserInterface {
 
     $matches=[];
     preg_match_all('/{(.*?)}/', $string, $matches);
+
+    // don't allow spaces between parameter definitions
+    array_map(function ($match) {
+      if (strpos($match, '{ ') !== false || strpos($match, ' }') !== false) {
+        throw new \InvalidArgumentException(
+          sprintf(
+            "%s::extractParameterDefinitions() parse error,
+            space between brackets in parameter definition is not allowed: %s",
+            get_class($this),
+            $match
+          )
+        );
+      }
+    }, $matches[0]);
+
     return $matches[1];
   }
 
