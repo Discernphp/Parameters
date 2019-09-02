@@ -11,6 +11,12 @@ class User{
     $this->last_name = isset($info['last_name']) ? $info['last_name'] : 'Lee';
     $this->age = isset($info['age']) ? $info['age'] : 32;
     $this->address = isset($info['address']) ? $info['address'] : '333 25th lane';
+    $this->is_admin = isset($info['is_admin']) ? $info['is_admin'] : false;
+  }
+
+  public function getId()
+  {
+    return $this->id;
   }
 
   public function getFirstName()
@@ -36,5 +42,10 @@ class User{
   public function getAddress()
   {
     return $this->address;
+  }
+
+  public function isAdmin()
+  {
+    return $this->is_admin;
   }
 }
