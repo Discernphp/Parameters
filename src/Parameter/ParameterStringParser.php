@@ -25,7 +25,6 @@ class ParameterStringParser implements ParameterStringParserInterface {
       );
     }
 
-    $paramProperties=[];
     $matches=[];
     preg_match_all('/{(.*?)}/', $string, $matches);
     return $matches[1];
@@ -180,6 +179,7 @@ class ParameterStringParser implements ParameterStringParserInterface {
       $param_id = $is_child ? $param->getParent()->getId() : $param->getId();
 
       // if the argument is an instance of the invoked parameter use that instead
+      // TODO: remove this manual check and iject service that does the comparison
       if (is_object($args) && is_a($args, $param->getType())) {
         $instance = $arguments[$param_id];
       }
