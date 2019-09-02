@@ -1,8 +1,14 @@
 <?php namespace Discern\Parameter\Object;
 
 use Discern\Parameter\Object\Contract\ObjectAccessorInterface;
+use Discern\Parameter\Template\Contract\BlankClassTemplateInterface;
 
 class ObjectAccessor implements ObjectAccessorInterface {
+  public function __construct($strict = false)
+  {
+    $this->strict = $strict;
+  }
+
   /**
    * [get description]
    * @param  object $instance [description]
@@ -62,6 +68,15 @@ class ObjectAccessor implements ObjectAccessorInterface {
   }
 
   /**
+   * [isStrict description]
+   * @return boolean [description]
+   */
+  public function isStrict()
+  {
+    return $this->strict;
+  }
+
+  /**
    * [accessPropertyValue description]
    * @param  [type] $instance [description]
    * @param  [type] $property [description]
@@ -78,7 +93,7 @@ class ObjectAccessor implements ObjectAccessorInterface {
     }
 
     $property_snake = $this->toSnakeCase($property);
-    $method = $action.$property_snake;
+    $method = $action.'_'.$property_snake;
     if (method_exists($instance, $method)) {
       return $instance->{$method}($value);
     }
@@ -98,20 +113,65 @@ class ObjectAccessor implements ObjectAccessorInterface {
       }
     }
 
+    $exception = '';
+
     if ($action === 'set') {
-      return $instance->{$property} = $value;
+      // determine if the property is private or protected before setting
+      // to avoid fatal error. We want to throw an exception instead
+      // If the property is not private or protected, and doesn't exist
+      // we will define it
+      if (!$this->hasProtectedProperty($instance, $property) && !$this->isStrict()) {
+        return $instance->{$property} = $value;
+      }
+
+      // attempt to set the property through magic setter if available
+      if (method_exists($instance, '__set')) {
+        try {
+          return $instance->__set($property, $value);
+        } catch (\Exception $e) {
+          $exception_message = $e->getMessage();
+          $exception_class = get_class($e);
+          $exception = "Instance threw Exception `{$exception_class}` with message '{$exception_message}'";
+        }
+      }
     }
+
+    $instance_class = get_class($instance);
+    $value_type = gettype($value);
+    $value = is_object($value) ? get_class($value) : $value;
 
     throw new \InvalidArgumentException(
       sprintf(
-        'Could not %s `%s::%s` using `%s`:`%s`. Make sure the property is defined',
+        'Could not %s `%s::%s` using `%s`:`%s`.
+         Make sure the property is defined as `public` or is accessible via `%s::__set("%s", {value})`.
+         %s',
         $action,
-        get_class($instance),
+        $instance_class,
         $property,
-        gettype($value),
-        is_object($value) ? get_class($value) : $value
+        $value_type,
+        $value,
+        $instance_class,
+        $property,
+        $exception
       )
     );
+  }
+
+  /**
+   * [hasPublicProperty description]
+   * @param  [type]  $instance [description]
+   * @param  [type]  $property [description]
+   * @return boolean           [description]
+   */
+  public static function hasProtectedProperty($instance, $property)
+  {
+    $reflection = new \ReflectionObject($instance);
+    $properties = $reflection->getProperties(
+      \ReflectionProperty::IS_PRIVATE | \ReflectionProperty::IS_PROTECTED
+    );
+    return !empty(array_filter($properties, function($prop) use($property) {
+      return $property === $prop->getName();
+    }));
   }
 
   /**
