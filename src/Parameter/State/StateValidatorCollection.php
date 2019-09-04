@@ -40,7 +40,7 @@ class StateValidatorCollection implements StateValidatorCollectionInterface {
     if (!isset($validators[$id][$state_id])) {
       throw new \InvalidArgumentException(
         sprintf(
-          'Attempted to get undefined `StateValidator` using `id=%s` for `state=%s`',
+          'Attempted to get undefined `StateValidator` using `id=%s` for `state="%s"`',
           $id,
           $state_id
         )

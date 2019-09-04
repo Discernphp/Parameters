@@ -6,24 +6,34 @@ use Discern\Parameter\State\Contract\StateValidatorCollectionInterface;
 class StateValidationProvider implements StateValidationProviderInterface {
   public function validateState($instance_id, $instance, array $states)
   {
+    $valid = true;
+    $errors = [];
     for ($i = 0; isset($states[$i]); $i++) {
-      $valid = true;
-      $errors = [];
-      for ($j = 0; isset($states[$i][$j]); $j++) {
-        $state_id = $states[$i][$j];
-        $validator = $this->getStateValidatorCollection()->get($instance_id, $state_id);
-        $valid = $validator->isValid($instance);
-
-        if (!$valid) {
+      $state_id = $states[$i];
+      if (is_array($state_id)) {
+        try {
+          $valid = $this->validateState($instance_id, $instance, $state_id);
+        } catch (StateValidationException $e) {
+          $valid = false;
           $errors = array_merge(
             $errors,
-            $validator->getErrors()
+            $e->getErrors()
           );
-          break;
         }
+        continue;
       }
-      if ($valid) return $valid;
+
+      $validator = $this->getStateValidatorCollection()->get($instance_id, $state_id);
+      $valid = $validator->isValid($instance);
+
+      if (!$valid) {
+        $errors = array_merge(
+          $errors,
+          $validator->getErrors()
+        );
+      }
     }
+    if ($valid) return $valid;
 
     $exception = new StateValidationException(
       sprintf(

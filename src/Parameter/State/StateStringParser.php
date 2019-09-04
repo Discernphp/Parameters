@@ -40,7 +40,9 @@ class StateStringParser implements StateStringParserInterface {
         $mapping_parsed[$key][] = array_map('trim', explode(' and ', $state));
       }
     }
-    return array_values($mapping_parsed)[0];
+
+    $mappings_cleaned = $this->cleanMappings($mapping, $mapping_parsed);
+    return array_values($mappings_cleaned);
   }
 
   private function mapStateExpression($expression)
@@ -63,5 +65,21 @@ class StateStringParser implements StateStringParserInterface {
 
     $mapping[uniqid()] = $state_string_parsed;
     return $mapping;
+  }
+
+  private function cleanMappings(array $mapping, array $mapped_values)
+  {
+    foreach ($mapped_values as $key => $value) {
+      if (is_array($value)) {
+        $mapped_values[$key] = $this->cleanMappings($mapping, $value);
+        continue;
+      }
+
+      if (isset($mapping[$value])) {
+        unset($mapped_values[$key]);
+      }
+    }
+
+    return $mapped_values;
   }
 }

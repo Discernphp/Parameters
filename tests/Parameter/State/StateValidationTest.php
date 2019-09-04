@@ -40,37 +40,16 @@ final class StateValidationTest extends TestCase {
     $this->provider->setStateValidatorCollection($states);
   }
 
-  public function testCanValidateStateWithProvider()
-  {
-    $states = $this->parser->parseStateString(
-      'is admin or is elderly'
-    );
 
-    $user = new User(1, [
-      'is_admin' => true,
-      'age' => 21
-    ]);
-
-    $result = $this->provider->validateState(
-      User::class,
-      $user,
-      $states
-    );
-
-    $this->assertEquals(
-      $result,
-      true
-    );
-  }
 
   public function testThrowsExceptionWhenInstanceInWrongState()
   {
     $states = $this->parser->parseStateString(
-      'is elderly and has pet'
+      'is elderly or (is admin)'
     );
 
     $user = new User(1, [
-      'is_admin' => true,
+      'is_admin' => false,
       'age' => 21
     ]);
 
