@@ -9,10 +9,10 @@ class StateValidationProvider implements StateValidationProviderInterface {
     $valid = true;
     $errors = [];
     for ($i = 0; isset($states[$i]); $i++) {
-      $state_id = $states[$i];
-      if (is_array($state_id)) {
+      $state = $states[$i];
+      if (is_array($state)) {
         try {
-          $valid = $this->validateState($instance_id, $instance, $state_id);
+          return $this->validateState($instance_id, $instance, $state);
         } catch (StateValidationException $e) {
           $valid = false;
           $errors = array_merge(
@@ -23,8 +23,11 @@ class StateValidationProvider implements StateValidationProviderInterface {
         continue;
       }
 
-      $validator = $this->getStateValidatorCollection()->get($instance_id, $state_id);
-      $valid = $validator->isValid($instance);
+      // convert instance_id to positive if negation flag found
+      $validator = $this->getStateValidatorCollection()->get($instance_id, $state->getId());
+      $valid = $state->apply(
+        $validator->isValid($instance)
+      );
 
       if (!$valid) {
         $errors = array_merge(

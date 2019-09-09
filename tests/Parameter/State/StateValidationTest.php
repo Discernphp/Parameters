@@ -40,12 +40,10 @@ final class StateValidationTest extends TestCase {
     $this->provider->setStateValidatorCollection($states);
   }
 
-
-
   public function testThrowsExceptionWhenInstanceInWrongState()
   {
     $states = $this->parser->parseStateString(
-      'is elderly or (is admin)'
+      'isn\'t elderly and is admin'
     );
 
     $user = new User(1, [

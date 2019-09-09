@@ -7,7 +7,8 @@ class StateStringParser implements StateStringParserInterface {
   {
     //extract text inside parentheses
     $mapping = $this->mapStateExpression($string);
-    return $this->arrayInjectMapping($mapping);
+    $mapping_raw = $this->arrayInjectMapping($mapping);
+    return $this->initMappings($mapping_raw);
   }
 
   private function arrayInjectMapping($mapping)
@@ -22,7 +23,8 @@ class StateStringParser implements StateStringParserInterface {
         continue;
       }
 
-      $states = array_map('trim', explode(' or ', $expression));
+      $states = $this->splitByConjunction($expression);
+
       foreach ($states as $state) {
         if (isset($mapping_parsed[$state])) {
           $mapping_parsed[$key] = array_merge(
@@ -37,12 +39,75 @@ class StateStringParser implements StateStringParserInterface {
           $mapping_parsed[$key] = [];
         }
 
-        $mapping_parsed[$key][] = array_map('trim', explode(' and ', $state));
+
+        $mapping_parsed[$key][] = array_map(
+          'trim',
+          preg_split("/(,| and | then )/", $state)
+        );
       }
     }
 
     $mappings_cleaned = $this->cleanMappings($mapping, $mapping_parsed);
     return array_values($mappings_cleaned);
+  }
+
+  protected function initMappings($mapping)
+  {
+    $results = [];
+    foreach ($mapping as $key => $value) {
+      if (is_array($value)) {
+        $results[$key] = $this->initMappings($value);
+        continue;
+      }
+      $positive_id = $this->getPositiveActionId($value);
+      $results[$key] = new ActionResultContext($positive_id, [
+        'negate' => $positive_id !== $value
+      ]);
+    }
+    return $results;
+  }
+
+  private function getPositiveActionId($id)
+  {
+    $replace = [
+      'isn\'t' => 'is ',
+      'can\'t' => 'can ',
+      'cannot' => 'can ',
+      'not'    => ' ',
+      'won\'t' => 'will ',
+      'doesn\'t' => 'does ',
+      'wasn\'t' => 'was ',
+    ];
+
+    $pattern = sprintf(
+      '/(^|[ ])(%s)\s+/',
+      implode('|', array_keys($replace))
+    );
+
+    $positive_id = trim(preg_replace_callback($pattern, function($matches) use ($replace) {
+      return $replace[$matches[2]];
+    }, $id));
+
+    return $positive_id ?: $id;
+  }
+
+  private function splitByConjunction($expression)
+  {
+    $states = array_map('trim', explode(' or ', $expression));
+    $i = 0;
+    while (isset($states[$i])) {
+      if (strpos($states[$i], ',') !== false) {
+        $parts = array_map('trim', explode(',', $states[$i]));
+        $parts_last = count($parts)-1;
+        if (strpos($parts[$parts_last], ' and ') === false && isset($states[$i+1])) {
+          array_splice($states, $i, 1, $parts);
+          $i += count($parts)-1;
+          continue;
+        }
+      }
+      $i++;
+    }
+    return $states;
   }
 
   private function mapStateExpression($expression)
@@ -52,7 +117,6 @@ class StateStringParser implements StateStringParserInterface {
     $state_string_parsed = $expression;
     $expression_array = $matches[1];
     $mapping = [];
-
     for ($i = 0; isset($expression_array[$i]); $i++) {
       $map_key = uniqid();
       $mapping[$map_key] = $expression_array[$i];
