@@ -39,7 +39,6 @@ class StateStringParser implements StateStringParserInterface {
           $mapping_parsed[$key] = [];
         }
 
-
         $mapping_parsed[$key][] = array_map(
           'trim',
           preg_split("/(,| and | then )/", $state)
