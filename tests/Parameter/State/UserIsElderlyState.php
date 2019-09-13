@@ -12,16 +12,17 @@ class UserIsElderlyState implements StateValidatorInterface {
 
   public function isValid($user)
   {
-    if ($user->getAge() < 59) {
-      $this->errors[] = sprintf('user id: `%s` is under the age of 59', $user->getId());
-      return false;
-    }
-
-    return true;
+    $this->state = ($user->getAge() >= 59);
+    return $this->state;
   }
 
-  public function getErrors()
+  public function getStateDescription()
   {
-    return $this->errors;
+    return [
+      sprintf(
+        'user is %s age 59',
+        $this->state ? 'under' : 'atleast'
+      )
+    ];
   }
 }

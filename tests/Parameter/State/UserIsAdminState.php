@@ -12,16 +12,17 @@ class UserIsAdminState implements StateValidatorInterface {
 
   public function isValid($user)
   {
-    if (!$user->isAdmin()) {
-      $this->errors[] = sprintf('user id `%s` is not an administrator', $user->getId());
-      return false;
-    }
-
-    return true;
+    $this->state = !!$user->isAdmin();
+    return $this->state;
   }
 
-  public function getErrors()
+  public function getStateDescription()
   {
-    return $this->errors;
+    return [
+      sprintf(
+        'user %s an admin',
+        $this->state ? 'is' : 'is not'
+      )
+    ];
   }
 }

@@ -6,7 +6,8 @@ class ActionResultContext implements ActionResultContextInterface {
   private $id;
 
   private $options = [
-    'negate' => false
+    'negate' => false,
+    'params' => [],
   ];
 
   public function __toString()
@@ -23,6 +24,11 @@ class ActionResultContext implements ActionResultContextInterface {
   public function getId()
   {
     return $this->id;
+  }
+
+  public function expects()
+  {
+    return $this->options['params'];
   }
 
   public function apply($result)

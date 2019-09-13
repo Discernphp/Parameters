@@ -8,7 +8,7 @@ class StateStringParser implements StateStringParserInterface {
     //extract text inside parentheses
     $mapping = $this->mapStateExpression($string);
     $mapping_raw = $this->arrayInjectMapping($mapping);
-    return $this->initMappings($mapping_raw);
+    return $this->initMappings($mapping_raw)[0];
   }
 
   private function arrayInjectMapping($mapping)
@@ -58,12 +58,39 @@ class StateStringParser implements StateStringParserInterface {
         $results[$key] = $this->initMappings($value);
         continue;
       }
-      $positive_id = $this->getPositiveActionId($value);
+      list($name, $params) = $this->extractParameters($value);
+      $positive_id = $this->getPositiveActionId($name);
       $results[$key] = new ActionResultContext($positive_id, [
-        'negate' => $positive_id !== $value
+        'negate' => $positive_id !== $name,
+        'params' => $params
       ]);
     }
     return $results;
+  }
+
+  private function extractParameters($id)
+  {
+    $params = [];
+
+    if (strpos($id, ':') !== false) {
+      $id_parts = explode(':', $id);
+      if ($id[0] !== ':') {
+        unset($id_parts[0]);
+      }
+      if (!empty($id_parts)) {
+        $params = array_values(array_filter(array_map(function($part){
+          return explode(' ', $part)[0];
+        }, $id_parts)));
+
+        $id = str_replace(array_map(function ($param){
+          return ':'.$param;
+        }, $params), '%p', $id);
+      }      
+    }
+
+    return [
+      $id, $params
+    ];
   }
 
   private function getPositiveActionId($id)

@@ -3,7 +3,5 @@
 interface StateValidatorInterface {
   public function getId();
 
-  public function isValid($instance);
-
-  public function getErrors();
+  public function getStateDescription();
 }

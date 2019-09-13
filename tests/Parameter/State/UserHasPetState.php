@@ -3,8 +3,6 @@
 use Discern\Parameter\State\Contract\StateValidatorInterface;
 
 class UserHasPetState implements StateValidatorInterface {
-  protected $errors = [];
-
   public function getId()
   {
     return 'has pet';
@@ -12,16 +10,17 @@ class UserHasPetState implements StateValidatorInterface {
 
   public function isValid($user)
   {
-    if (!isset($user->getPet()->id)) {
-      $this->errors[] = sprintf('user id: `%s`, has no pet', $user->getId());
-      return false;
-    }
-
-    return true;
+    $this->state = !!isset($user->getPet()->id);
+    return $this->state;
   }
 
-  public function getErrors()
+  public function getStateDescription()
   {
-    return $this->errors;
+    return [
+      sprintf(
+        'user %s a pet',
+        $this->state ? 'does not have' : 'has'
+      )
+    ];
   }
 }

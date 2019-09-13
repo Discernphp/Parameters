@@ -9,6 +9,7 @@ use Discern\Test\Parameter\State\UserHasPetState;
 use Discern\Test\Parameter\State\UserIsElderlyState;
 use Discern\Test\Parameter\State\UserIsLegalAgeState;
 use Discern\Test\Parameter\State\UserIsAdminState;
+use Discern\Test\Parameter\State\UserIsOlderThanState;
 use Discern\Test\Parameter\User;
 
 final class StateValidationTest extends TestCase {
@@ -35,9 +36,56 @@ final class StateValidationTest extends TestCase {
       new UserIsAdminState()
     );
 
+    $states->add(
+      User::class,
+      new UserIsOlderThanState()
+    );
+
     $this->parser = new StateStringParser();
     $this->provider = new StateValidationProvider();
     $this->provider->setStateValidatorCollection($states);
+  }
+
+  public function testCallsStateWithCorrectParameters()
+  {
+    $states = $this->parser->parseStateString(
+      'is older than :age'
+    );
+
+    $user = new User(1, [
+      'age' => 59
+    ]);
+
+    $result = $this->provider->validateState(
+      User::class,
+      $user,
+      $states,
+      ['age' => 58]
+    );
+
+    $this->assertEquals($result, true);
+  }
+
+  public function testCanNegateStateWithCorrectParameters()
+  {
+    $states = $this->parser->parseStateString(
+      'is not older than :age'
+    );
+
+    $user = new User(1, [
+      'age' => 59
+    ]);
+
+    $this->expectException(
+      StateValidationException::class
+    );
+
+    $result = $this->provider->validateState(
+      User::class,
+      $user,
+      $states,
+      ['age' => 58]
+    );
   }
 
   public function testThrowsExceptionWhenInstanceInWrongState()
