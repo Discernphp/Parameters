@@ -7,7 +7,12 @@ class StateValidationProvider implements StateValidationProviderInterface {
   public function validateState($instance_id, $instance, array $states, array $params = [])
   {
     $valid = true;
+    $result = null;
     $errors = [];
+    $array = [
+      ['a', 'b'],
+      ['c', 'd']
+    ];
     for ($i = 0; isset($states[$i]); $i++) {
       $state = $states[$i];
       if (is_array($state)) {

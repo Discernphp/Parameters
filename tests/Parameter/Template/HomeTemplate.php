@@ -1,10 +1,8 @@
 <?php namespace Discern\Test\Parameter\Template;
 
-use Discern\Parameter\Template\Contract\ClassTemplateInterface;
-use Discern\Parameter\Template\ClassTemplateTrait;
+use Discern\Parameter\Template\ClassTemplate;
 
-class HomeTemplate implements ClassTemplateInterface {
-  use ClassTemplateTrait;
+class HomeTemplate extends ClassTemplate {
 
   protected $templated_class = Home::class;
 

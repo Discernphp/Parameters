@@ -1,20 +1,18 @@
 <?php namespace Discern\Parameter;
 
 use Discern\Parameter\Contract\ParameterFactoryInterface;
-use Discern\Parameter\Contract\ParameterConfigInterface;
+use Discern\Parameter\Contract\Accessor\TypeValidatorAccessorInterface;
+use Discern\Parameter\Contract\Accessor\TypeValidatorAccessorTrait;
 
-class ParameterFactory implements ParameterFactoryInterface {
-  public function invokeParameter(ParameterConfigInterface $config, array $params)
+class ParameterFactory implements ParameterFactoryInterface, TypeValidatorAccessorInterface {
+  use TypeValidatorAccessorTrait;
+
+  public function make($id, array $properties, TypeValidatorInterface $validator = null)
   {
-    $type = $config->getType();
-
-    if (class_exists($type)) {
-      $reflect  = new \ReflectionClass($type);
-      return $reflect->newInstanceArgs($params);
-    }
-
-    $param = $params[0];
-    settype($param, $type);
-    return $param;
+  	return new Parameter(
+  	  $id,
+  	  $properties,
+  	  $validator ?: $this->getParameterTypeValidator()
+  	);
   }
 }

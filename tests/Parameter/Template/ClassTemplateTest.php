@@ -1,16 +1,17 @@
 <?php namespace Discern\Test\Parameter\Template;
 
 use PHPUnit\Framework\TestCase;
-use Discern\Parameter\ParameterStringParser;
-use Discern\Parameter\ParameterConfigCollectionFactory;
-use Discern\Parameter\ParameterConfigCollection;
-use Discern\Parameter\ParameterConfigFactory;
-use Discern\Parameter\ParameterConfigChildFactory;
-use Discern\Parameter\ParameterFactoryCollection;
+use Discern\Parameter\StringParser;
+use Discern\Parameter\ParameterCollectionFactory;
+use Discern\Parameter\ParameterCollection;
 use Discern\Parameter\ParameterFactory;
-use Discern\Parameter\ParameterInjectionFactory;
-use Discern\Parameter\Contract\ParameterConfigInterface;
-use Discern\Parameter\Struct\ParameterStructFactory;
+use Discern\Parameter\ParameterChildFactory;
+use Discern\Parameter\TypeFactoryCollection;
+use Discern\Parameter\TypeFactory;
+use Discern\Parameter\InjectionFactory;
+use Discern\Parameter\TypeValidator;
+use Discern\Parameter\Contract\ParameterInterface;
+use Discern\Parameter\Struct\StructFactory;
 use Discern\Parameter\Template\Factory;
 use Discern\Parameter\Template\ClassTemplate;
 use Discern\Test\Parameter\User;
@@ -20,41 +21,43 @@ use Discern\Parameter\Object\ObjectAccessor;
 class ClassTemplateTest extends TestCase {
   public function __construct()
   {
-    $param_collection_factory = new ParameterConfigCollectionFactory();
-    $param_factory_collection = new ParameterFactoryCollection();
-    $param_factory = new ParameterFactory();
-    $param_config_factory = new ParameterConfigFactory();
-    $param_config_child = new ParameterConfigChildFactory();
-    $injection_factory = new ParameterInjectionFactory();
+    $param_collection_factory = new ParameterCollectionFactory();
+    $param_factory_collection = new TypeFactoryCollection();
+    $param_factory = new TypeFactory();
+    $param_config_factory = new ParameterFactory();
+    $param_config_child = new ParameterChildFactory();
+    $injection_factory = new InjectionFactory();
     $accessor = new ObjectAccessor(true);
 
-    $param_factory_collection
-      ->add(ParameterFactoryCollection::$DEFAULT_FACTORY_ID, $param_factory);
+    $param_config_factory->setParameterTypeValidator(new TypeValidator());
 
-    $parser = new ParameterStringParser();
+    $param_factory_collection
+      ->add(TypeFactoryCollection::$DEFAULT_FACTORY_ID, $param_factory);
+
+    $parser = new StringParser();
     $parser
-      ->setParameterFactoryCollection($param_factory_collection)
-      ->setParameterConfigCollectionFactory($param_collection_factory)
-      ->setParameterConfigFactory($param_config_factory)
+      ->setParameterTypeFactoryCollection($param_factory_collection)
+      ->setParameterCollectionFactory($param_collection_factory)
+      ->setParameterFactory($param_config_factory)
       ->setParameterInjectionFactory($injection_factory)
       ->setObjectAccessor($accessor)
-      ->setParameterConfigChildFactory($param_config_child);
+      ->setParameterChildFactory($param_config_child);
 
     $this->home = new HomeTemplate();
     $this->home
-      ->setParameterStructFactory(new ParameterStructFactory())
-      ->setParameterConfigCollectionFactory($param_collection_factory)
-      ->setParameterFactoryCollection($param_factory_collection)
+      ->setParameterStructFactory(new StructFactory())
+      ->setParameterCollectionFactory($param_collection_factory)
+      ->setParameterTypeFactoryCollection($param_factory_collection)
       ->setObjectAccessor($accessor)
-      ->setParser($parser);
+      ->setParameterStringParser($parser);
 
     $blank_template = new ClassTemplate();
     $blank_template
-      ->setParameterStructFactory(new ParameterStructFactory())
-      ->setParameterConfigCollectionFactory($param_collection_factory)
-      ->setParameterFactoryCollection($param_factory_collection)
+      ->setParameterStructFactory(new StructFactory())
+      ->setParameterCollectionFactory($param_collection_factory)
+      ->setParameterTypeFactoryCollection($param_factory_collection)
       ->setObjectAccessor($accessor)
-      ->setParser($parser);
+      ->setParameterStringParser($parser);
 
     $this->factory = new Factory();
     $this->factory->setClassTemplate($blank_template);

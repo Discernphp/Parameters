@@ -1,41 +1,43 @@
 <?php namespace Discern\Test\Parameter;
 
 use PHPUnit\Framework\TestCase;
-use Discern\Parameter\Struct\ParameterStructFactory;
-use Discern\Parameter\ParameterConfigCollectionFactory;
-use Discern\Parameter\ParameterConfig;
-use Discern\Parameter\ParameterConfigCollection;
-use Discern\Parameter\ParameterFactoryCollection;
-use Discern\Parameter\ParameterFactory;
-use Discern\Parameter\ParameterConfigException;
-use Discern\Parameter\Contract\ParameterConfigInterface;
+use Discern\Parameter\Struct\StructFactory;
+use Discern\Parameter\ParameterCollectionFactory;
+use Discern\Parameter\Parameter;
+use Discern\Parameter\ParameterCollection;
+use Discern\Parameter\TypeValidator;
+use Discern\Parameter\TypeFactory;
+use Discern\Parameter\TypeFactoryCollection;
+use Discern\Parameter\ParameterException;
+use Discern\Parameter\Contract\ParameterInterface;
 use Discern\Test\Parameter\User;
 use Discern\Test\Parameter\Animal;
 
 final class ParameterStructTest extends TestCase {
   public function __construct()
   {
-    $this->struct = new ParameterStructFactory();
+    $this->struct = new StructFactory();
 
-    $this->params = new ParameterConfigCollectionFactory();
+    $this->params = new ParameterCollectionFactory();
+    $this->type_validator = new TypeValidator();
     
     // initialize factory collection
-    $param_factory_collection = new ParameterFactoryCollection();
-    $param_factory = new ParameterFactory();
+    $param_factory_collection = new TypeFactoryCollection();
+    $param_factory = new TypeFactory();
     $param_factory_collection
-      ->add(ParameterFactoryCollection::$DEFAULT_FACTORY_ID, $param_factory);
+      ->add(TypeFactoryCollection::$DEFAULT_FACTORY_ID, $param_factory);
     $this->param_factory = $param_factory_collection;
   }
 
   public function testCanGetParamInstancesFromStruct()
   {
     $params = $this->params->make([
-      new ParameterConfig('user', [
+      new Parameter('user', [
         'type' => User::class
-      ]),
-      new ParameterConfig('pet', [
+      ], $this->type_validator),
+      new Parameter('pet', [
         'type' => Animal::class
-      ]),      
+      ], $this->type_validator),      
     ]);
 
     $struct = $this->struct->make($params, $this->param_factory);
@@ -58,12 +60,12 @@ final class ParameterStructTest extends TestCase {
   public function testFailsWhenIncorrectTypeGiven()
   {
     $params = $this->params->make([
-      new ParameterConfig('user', [
+      new Parameter('user', [
         'type' => User::class
-      ]),   
+      ], $this->type_validator),   
     ]);
 
-    $this->expectException(ParameterConfigException::class);
+    $this->expectException(ParameterException::class);
 
     $struct = $this->struct->make($params, $this->param_factory);
 
@@ -75,9 +77,9 @@ final class ParameterStructTest extends TestCase {
   public function testFailsWhenSettingPropertyofFrozenStruct()
   {
     $params = $this->params->make([
-      new ParameterConfig('user', [
+      new Parameter('user', [
         'type' => User::class
-      ]),   
+      ], $this->type_validator),   
     ]);
 
     $struct = $this->struct

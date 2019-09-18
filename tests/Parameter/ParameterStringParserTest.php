@@ -1,16 +1,17 @@
 <?php namespace Discern\Test\Parameter;
 
 use PHPUnit\Framework\TestCase;
-use Discern\Parameter\ParameterStringParser;
-use Discern\Parameter\ParameterConfigCollectionFactory;
-use Discern\Parameter\ParameterConfigCollection;
-use Discern\Parameter\ParameterConfigFactory;
-use Discern\Parameter\ParameterConfigChildFactory;
-use Discern\Parameter\ParameterFactoryCollection;
+use Discern\Parameter\StringParser;
+use Discern\Parameter\ParameterCollectionFactory;
+use Discern\Parameter\ParameterCollection;
+use Discern\Parameter\TypeFactory;
 use Discern\Parameter\ParameterFactory;
-use Discern\Parameter\ParameterInjectionFactory;
-use Discern\Parameter\Contract\ParameterConfigInterface;
-use Discern\Parameter\InvalidParameterConfigException;
+use Discern\Parameter\ParameterChildFactory;
+use Discern\Parameter\TypeFactoryCollection;
+use Discern\Parameter\InjectionFactory;
+use Discern\Parameter\Contract\ParameterInterface;
+use Discern\Parameter\InvalidParameterException;
+use Discern\Parameter\TypeValidator;
 use Discern\Test\Parameter\User;
 use Discern\Test\Parameter\Animal;
 use Discern\Parameter\Object\ObjectAccessor;
@@ -18,25 +19,27 @@ use Discern\Parameter\Object\ObjectAccessor;
 final class ParameterStringParserTest extends TestCase {
   public function __construct()
   {
-    $param_collection_factory = new ParameterConfigCollectionFactory();
-    $param_factory_collection = new ParameterFactoryCollection();
-    $param_factory = new ParameterFactory();
-    $param_config_factory = new ParameterConfigFactory();
-    $param_config_child = new ParameterConfigChildFactory();
-    $injection_factory = new ParameterInjectionFactory();
+    $param_collection_factory = new ParameterCollectionFactory();
+    $param_factory_collection = new TypeFactoryCollection();
+    $param_factory = new TypeFactory();
+    $param_config_factory = new ParameterFactory();
+    $param_config_child = new ParameterChildFactory();
+    $injection_factory = new InjectionFactory();
     $accessor = new ObjectAccessor();
-    $parser = new ParameterStringParser();
+    $parser = new StringParser();
+    $type_validator = new TypeValidator();
+    $param_config_factory->setParameterTypeValidator($type_validator);
 
     $param_factory_collection
-      ->add(ParameterFactoryCollection::$DEFAULT_FACTORY_ID, $param_factory);
+      ->add(TypeFactoryCollection::$DEFAULT_FACTORY_ID, $param_factory);
     
     $parser
-      ->setParameterFactoryCollection($param_factory_collection)
-      ->setParameterConfigCollectionFactory($param_collection_factory)
-      ->setParameterConfigFactory($param_config_factory)
+      ->setParameterTypeFactoryCollection($param_factory_collection)
+      ->setParameterCollectionFactory($param_collection_factory)
+      ->setParameterFactory($param_config_factory)
       ->setParameterInjectionFactory($injection_factory)
       ->setObjectAccessor($accessor)
-      ->setParameterConfigChildFactory($param_config_child);
+      ->setParameterChildFactory($param_config_child);
 
     $this->parser = $parser;
     $this->param_collection = $param_collection_factory;
@@ -63,13 +66,13 @@ final class ParameterStringParserTest extends TestCase {
     );
   }
 
-  public function testCanConvertStringToParameterConfig()
+  public function testCanConvertStringToParameter()
   {
     $user_class = User::class;
 
     $param_config = $this->parser->parseParameterString('user:'.$user_class.'.name|[1]');
 
-    $this->assertInstanceOf(ParameterConfigInterface::class,$param_config);
+    $this->assertInstanceOf(ParameterInterface::class,$param_config);
 
     $this->assertEquals(
       $param_config->getId(),
@@ -99,7 +102,7 @@ final class ParameterStringParserTest extends TestCase {
     $injection = $this->parser->injectParameters(
       '{user:Discern\Test\Parameter\User.first_name} {user.last_name} is {user.age} years old',
       ['user' => [1]],
-      new ParameterConfigCollection()
+      new ParameterCollection()
     );
 
     $this->assertEquals(
@@ -115,7 +118,7 @@ final class ParameterStringParserTest extends TestCase {
     $injection = $this->parser->injectParameters(
       '{user:Discern\Test\Parameter\User}',
       ['user' => [1]],
-      new ParameterConfigCollection()
+      new ParameterCollection()
     );
 
     $this->assertInstanceOf(
@@ -156,7 +159,7 @@ final class ParameterStringParserTest extends TestCase {
     $injection = $this->parser->arrayInjectParameters(
       $subject,
       ['user' => [1], 'animal' => [2]],
-      new ParameterConfigCollection()
+      new ParameterCollection()
     );
 
     $this->assertEquals(
@@ -184,12 +187,12 @@ final class ParameterStringParserTest extends TestCase {
   {
     $user = new User(3);
 
-    $this->expectException(InvalidParameterConfigException::class);
+    $this->expectException(InvalidParameterException::class);
 
     $injection = $this->parser->injectParameters(
       '{user:Discern\Test\Parameter\User.id|[3]}: {user:Discern\Test\Parameter\User.first_name|[3]}',
       [],
-      new ParameterConfigCollection()
+      new ParameterCollection()
     );
   }
 
@@ -200,7 +203,7 @@ final class ParameterStringParserTest extends TestCase {
     $injection = $this->parser->injectParameters(
       '{user_pet_type:Discern\Test\Parameter\User.pet.type}',
       ['user_pet_type' => $user],
-      new ParameterConfigCollection()
+      new ParameterCollection()
     );
 
     $this->assertEquals(
@@ -214,7 +217,7 @@ final class ParameterStringParserTest extends TestCase {
     $injection = $this->parser->injectParameters(
       'completely blank.{user?:Discern\Test\Parameter\User}',
       [],
-      new ParameterConfigCollection()
+      new ParameterCollection()
     );
 
     $this->assertEquals(

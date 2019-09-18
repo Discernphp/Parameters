@@ -1,11 +1,34 @@
 <?php namespace Discern\Parameter\Template;
 
 use Discern\Parameter\Template\TemplatedClass;
-use Discern\Parameter\Template\ClassTemplateTrait;
+use Discern\Parameter\Template\Contract\ClassTemplateTrait;
 use Discern\Parameter\Template\Contract\BlankClassTemplateInterface;
+use Discern\Parameter\Object\Contract\Accessor\ObjectAccessorAccessorInterface;
+use Discern\Parameter\Object\Contract\Accessor\ObjectAccessorAccessorTrait;
+use Discern\Parameter\Contract\Accessor\ParameterCollectionFactoryAccessorInterface;
+use Discern\Parameter\Contract\Accessor\ParameterCollectionFactoryAccessorTrait;
+use Discern\Parameter\Contract\Accessor\TypeFactoryCollectionAccessorInterface;
+use Discern\Parameter\Contract\Accessor\TypeFactoryCollectionAccessorTrait;
+use Discern\Parameter\Contract\Accessor\StringParserAccessorInterface;
+use Discern\Parameter\Contract\Accessor\StringParserAccessorTrait;
+use Discern\Parameter\Struct\Contract\Accessor\StructFactoryAccessorInterface;
+use Discern\Parameter\Struct\Contract\Accessor\StructFactoryAccessorTrait;
 
-final class ClassTemplate implements BlankClassTemplateInterface {
-  use ClassTemplateTrait;
+
+class ClassTemplate implements 
+  BlankClassTemplateInterface,
+  ObjectAccessorAccessorInterface,
+  ParameterCollectionFactoryAccessorInterface,
+  TypeFactoryCollectionAccessorInterface,
+  StringParserAccessorInterface,
+  StructFactoryAccessorInterface {
+  use
+    ClassTemplateTrait,
+    ObjectAccessorAccessorTrait,
+    ParameterCollectionFactoryAccessorTrait,
+    TypeFactoryCollectionAccessorTrait,
+    StringParserAccessorTrait,
+    StructFactoryAccessorTrait;
 
   protected $templated_class = TemplatedClass::class;
 
